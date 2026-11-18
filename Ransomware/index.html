@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ransomware: mã độc tống tiền và cách phòng chống</title>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--page:#e9eeed;--ink:#12303b;--muted:#4a6670;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#0b1519;--ink:#e4eeee;--muted:#8fa9ae;color-scheme:dark}}
+:root[data-theme="dark"]{--page:#0b1519;--ink:#e4eeee;--muted:#8fa9ae;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font-family:"Be Vietnam Pro",system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;padding:16px}
+.wrap{width:100%;max-width:960px}
+.stage{position:relative;width:100%;aspect-ratio:16/9;background:#12303b;color:#eef2f0;border-radius:10px;overflow:hidden;--amber:#f2b134;--red:#e5534b;--mint:#7fd1b9}
+.scene{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:5% 6% 14%;opacity:0;visibility:hidden;transition:opacity .5s}
+.scene.on{opacity:1;visibility:visible}
+h1{font-size:clamp(26px,6.2vw,64px);line-height:1.08;margin:0 0 .35em;font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(20px,4vw,40px);margin:0 0 .6em;font-weight:800;line-height:1.15}
+p.sub{font-size:clamp(13px,2.2vw,22px);margin:0;color:#b9cfcf;max-width:34em;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-top:4%;max-width:60%}
+.f{aspect-ratio:1;background:#1f4654;border-radius:4px;display:grid;place-items:center;font-size:clamp(8px,1.6vw,16px);transition:background .3s}
+.f.lock{background:var(--red)}
+.row{display:flex;gap:3%;flex-wrap:wrap}
+.chip{background:#1f4654;border-left:4px solid var(--amber);padding:.7em 1em;border-radius:4px;font-size:clamp(12px,2.1vw,20px);font-weight:600;opacity:0;transform:translateY(8px);transition:all .5s;flex:1 1 40%;margin-bottom:3%}
+.chip.show{opacity:1;transform:none}
+.chip small{display:block;font-weight:400;color:#b9cfcf;margin-top:.2em;font-size:.82em}
+.good .chip{border-left-color:var(--mint)}
+.warn .chip{border-left-color:var(--red)}
+.note{background:#1a0f10;border:2px solid var(--red);border-radius:6px;padding:4% 5%;max-width:62%;font-size:clamp(11px,1.9vw,19px)}
+.note b{color:var(--red);font-size:1.2em}
+.timer{font-variant-numeric:tabular-nums;font-size:clamp(22px,5vw,50px);font-weight:800;color:var(--amber);margin-top:.3em}
+.mail{display:flex;align-items:center;gap:4%;margin-bottom:4%}
+.env{width:clamp(60px,12vw,120px);aspect-ratio:3/2;background:#eef2f0;border-radius:6px;position:relative;flex:none}
+.env::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom right,transparent 49%,#9fb4b4 50%,transparent 51%),linear-gradient(to bottom left,transparent 49%,#9fb4b4 50%,transparent 51%)}
+.env i{position:absolute;right:-8px;top:-8px;width:22px;height:22px;border-radius:50%;background:var(--red);z-index:2;animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.25)}}
+.cap{position:absolute;left:0;right:0;bottom:0;padding:2% 6% 4.5%;background:linear-gradient(transparent,rgba(5,14,18,.9));font-size:clamp(11px,2vw,20px);line-height:1.4;text-align:center;min-height:16%}
+.bar{position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(255,255,255,.15);cursor:pointer}
+.bar div{height:100%;width:0;background:var(--amber)}
+.ctrl{display:flex;gap:10px;align-items:center;margin-top:12px;flex-wrap:wrap}
+button{font:inherit;font-weight:600;padding:.55em 1.1em;border-radius:6px;border:2px solid var(--ink);background:transparent;color:var(--ink);cursor:pointer}
+button:focus-visible{outline:3px solid #f2b134;outline-offset:2px}
+button.p{background:var(--ink);color:var(--page)}
+.t{color:var(--muted);font-size:14px;margin-left:auto;font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.env i{animation:none}.chip,.scene{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="stage" id="stage" aria-label="Video giải thích về ransomware">
+  <section class="scene" id="s0">
+    <h1>Ransomware:<br>mã độc tống tiền</h1>
+    <p class="sub">Một cú nhấp chuột sai có thể khóa toàn bộ dữ liệu của bạn.</p>
+    <div class="grid" id="g0"></div>
+  </section>
+  <section class="scene" id="s1">
+    <h2>Nó vào máy bằng cách nào?</h2>
+    <div class="mail"><div class="env"><i></i></div><p class="sub">Email giả mạo, tệp đính kèm lạ, đường link độc hại.</p></div>
+    <div class="row" id="r1">
+      <div class="chip">Email lừa đảo<small>Giả danh ngân hàng, giao hàng</small></div>
+      <div class="chip">Phần mềm crack<small>Tải từ nguồn không rõ</small></div>
+      <div class="chip">Lỗ hổng chưa vá<small>Hệ điều hành lỗi thời</small></div>
+    </div>
+  </section>
+  <section class="scene" id="s2">
+    <h2>Chuyện gì xảy ra tiếp theo?</h2>
+    <div class="note"><b>Tệp của bạn đã bị mã hóa.</b><br>Trả tiền chuộc bằng tiền điện tử để nhận khóa giải mã.
+      <div class="timer" id="tm">71:59:59</div></div>
+    <div class="grid" id="g2" style="max-width:40%"></div>
+  </section>
+  <section class="scene good" id="s3">
+    <h2>4 cách phòng chống</h2>
+    <div class="row" id="r3">
+      <div class="chip">Sao lưu 3-2-1<small>3 bản, 2 loại thiết bị, 1 bản ngoại tuyến</small></div>
+      <div class="chip">Cập nhật thường xuyên<small>Vá lỗi hệ điều hành và phần mềm</small></div>
+      <div class="chip">Nghi ngờ mọi email lạ<small>Không mở tệp, không bấm link vội</small></div>
+      <div class="chip">Diệt virus và xác thực 2 lớp<small>Bảo vệ tài khoản và thiết bị</small></div>
+    </div>
+  </section>
+  <section class="scene warn" id="s4">
+    <h2>Nếu đã bị nhiễm?</h2>
+    <div class="row" id="r4">
+      <div class="chip">Ngắt mạng ngay<small>Rút cáp, tắt Wi-Fi để chặn lây lan</small></div>
+      <div class="chip">Không trả tiền chuộc<small>Không đảm bảo lấy lại được dữ liệu</small></div>
+      <div class="chip">Báo bộ phận IT<small>Khôi phục từ bản sao lưu sạch</small></div>
+    </div>
+  </section>
+  <section class="scene" id="s5">
+    <h1>Sao lưu hôm nay,<br>yên tâm ngày mai.</h1>
+    <p class="sub">Cẩn trọng khi bấm, cập nhật đều đặn, sao lưu đều đặn.</p>
+  </section>
+  <div class="cap" id="cap" aria-live="off"></div>
+  <div class="bar" id="bar" role="slider" aria-label="Tua video" tabindex="0"><div id="fill"></div></div>
+</div>
+<div class="ctrl">
+  <button class="p" id="pp">Phát</button>
+  <button id="rs">Xem lại</button>
+  <button id="vo" aria-pressed="true">Thuyết minh tiếng Việt: bật</button>
+  <span class="t" id="tt">0:00 / 1:06</span>
+</div>
+<p class="t" id="hint" style="margin:8px 0 0"></p>
+</div>
+<script>
+var S=[
+{d:9,c:"Ransomware là mã độc tống tiền: nó khóa toàn bộ dữ liệu của bạn và đòi tiền để mở lại."},
+{d:11,c:"Nó thường lây qua email giả mạo, phần mềm crack, hoặc lỗ hổng trên hệ thống chưa được cập nhật."},
+{d:11,c:"Khi vào máy, nó mã hóa tệp, rồi hiện thông báo đòi tiền chuộc bằng tiền điện tử trong thời hạn ngắn."},
+{d:19,c:"Cách phòng chống: sao lưu theo quy tắc 3-2-1, cập nhật phần mềm, không mở email lạ, và dùng diệt virus kèm xác thực hai lớp."},
+{d:9,c:"Nếu bị nhiễm, hãy ngắt mạng ngay, đừng trả tiền chuộc, và báo bộ phận IT để khôi phục từ bản sao lưu."},
+{d:7,c:"Sao lưu hôm nay, yên tâm ngày mai."}
+];
+var T=0;S.forEach(function(s){s.s=T;T+=s.d});
+var $=function(i){return document.getElementById(i)};
+function mk(id,n){var g=$(id),h="";for(var i=0;i<n;i++)h+='<div class="f">&#128196;</div>';g.innerHTML=h;return g.children}
+var f0=mk("g0",24),f2=mk("g2",16);
+var t=0,play=false,last=0,cur=-1,voice=true,spoken=-1;
+function fmt(x){x=Math.floor(x);return Math.floor(x/60)+":"+("0"+x%60).slice(-2)}
+function speak(i){
+  try{speechSynthesis.cancel();if(!voice||!play)return;
+  var u=new SpeechSynthesisUtterance(S[i].c);u.lang="vi-VN";u.rate=1;
+  var vs=speechSynthesis.getVoices().filter(function(v){return /^vi/i.test(v.lang)});
+  if(vs.length){u.voice=vs[0];$("hint").textContent=""}
+  else if(speechSynthesis.getVoices().length){$("hint").textContent="Thiết bị chưa có giọng tiếng Việt. Hãy cài giọng Vietnamese trong cài đặt hệ thống (Text-to-speech), hoặc dùng Chrome/Edge."}
+  speechSynthesis.speak(u)}catch(e){}
+}
+function render(){
+  var i=S.length-1;for(var k=0;k<S.length;k++){if(t<S[k].s+S[k].d){i=k;break}}
+  var lt=t-S[i].s,pr=lt/S[i].d;
+  if(i!==cur){
+    for(var k=0;k<S.length;k++)$("s"+k).classList.toggle("on",k===i);
+    $("cap").textContent=S[i].c;cur=i;
+    if(play)speak(i);
+  }
+  if(i===0){for(var a=0;a<f0.length;a++)f0[a].classList.toggle("lock",lt>3+a*.2)}
+  if(i===2){for(var b=0;b<f2.length;b++)f2[b].classList.toggle("lock",lt>.8+b*.4);
+    var rem=71*3600+59*60+59-Math.floor(lt*3000);if(rem<0)rem=0;
+    var h=Math.floor(rem/3600),m=Math.floor(rem%3600/60),sc=rem%60;
+    $("tm").textContent=h+":"+("0"+m).slice(-2)+":"+("0"+sc).slice(-2)}
+  var rows={1:"r1",3:"r3",4:"r4"};
+  if(rows[i]){var ch=$(rows[i]).children,n=ch.length;
+    for(var c=0;c<n;c++)ch[c].classList.toggle("show",lt>1+c*((S[i].d-3)/n))}
+  $("fill").style.width=(t/T*100)+"%";
+  $("tt").textContent=fmt(t)+" / "+fmt(T);
+}
+function tick(now){
+  if(play){t+=(now-last)/1000;if(t>=T){t=T-.01;play=false;$("pp").textContent="Phát";try{speechSynthesis.cancel()}catch(e){}}}
+  last=now;render();requestAnimationFrame(tick)
+}
+requestAnimationFrame(function(n){last=n;tick(n)});
+$("pp").onclick=function(){
+  if(t>=T-.05)t=0;
+  play=!play;this.textContent=play?"Tạm dừng":"Phát";
+  if(play)speak(cur<0?0:cur);else{try{speechSynthesis.cancel()}catch(e){}}
+};
+$("rs").onclick=function(){t=0;cur=-1;play=true;$("pp").textContent="Tạm dừng";render()};
+$("vo").onclick=function(){voice=!voice;this.setAttribute("aria-pressed",voice);this.textContent="Thuyết minh tiếng Việt: "+(voice?"bật":"tắt");if(voice&&play)speak(cur);else{try{speechSynthesis.cancel()}catch(e){}}};
+function seek(e){var r=$("bar").getBoundingClientRect();t=Math.max(0,Math.min(T-.05,(e.clientX-r.left)/r.width*T));cur=-1;render();if(play)speak(cur)}
+$("bar").addEventListener("click",seek);
+$("bar").addEventListener("keydown",function(e){if(e.key==="ArrowRight"){t=Math.min(T-.05,t+5);cur=-1}if(e.key==="ArrowLeft"){t=Math.max(0,t-5);cur=-1}});
+try{speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=function(){}}catch(e){}
+render();
+</script>
+</body>
+</html>
